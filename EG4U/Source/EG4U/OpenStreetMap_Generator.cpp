@@ -88,27 +88,38 @@ TArray<FVector> AOpenStreetMap_Generator::ScalePolygon(TArray<FVector>& polygon,
 
 TArray<FVector> AOpenStreetMap_Generator::OffsetPolygon(TArray<FVector> vertices, float offset, float z)
 {
-    TArray<FVector> offset_polygon;
-    if (vertices.Num() < 3) {
-        return vertices;
+    TArray<FVector> offset_polygon; int OuterCCW = 1;
+    if (offset < 0)
+        OuterCCW = -1;
+    if (OutWindsClockwise(vertices))
+        OuterCCW *= -1;
+
+    for (int32 Curr = 0; Curr < vertices.Num(); ++Curr) {
+        int32 Prev = (Curr + vertices.Num() - 1) % vertices.Num();
+        int32 Next = (Curr + 1) % vertices.Num();
+
+        FVector VN = FVector(vertices[Next].X - vertices[Curr].X, vertices[Next].Y - vertices[Curr].Y, z);
+        VN.Normalize();
+        float NNNX = VN.Y;
+        float NNNY = -VN.X;
+
+        FVector VP = FVector(vertices[Curr].X - vertices[Prev].X, vertices[Curr].Y - vertices[Prev].Y, z);
+        VP.Normalize();
+        float NPNX = VP.Y * OuterCCW;
+        float NPNY = -VP.X * OuterCCW;
+
+        float BISX = (NNNX + NPNX) * OuterCCW;
+        float BISY = (NNNY + NPNY) * OuterCCW;
+
+        FVector BISN = FVector(BISX, BISY, z);
+        BISN.Normalize();
+        float BISLen = offset / FMath::Sqrt((1 + NNNX * NPNX + NNNY * NPNY) / 2);
+
+        offset_polygon.Add(FVector(vertices[Curr].X + BISLen * BISN.X, vertices[Curr].Y + BISLen * BISN.Y, z));
     }
-
-    for (int i = 0; i < vertices.Num(); ++i) {
-        FVector current_vert = vertices[i];
-        int previous_id = (i == 0) ? vertices.Num() - 1 : i - 1;
-        int next_id = (i == vertices.Num() - 1) ? 0 : i + 1;
-
-        FVector previous_vert = vertices[previous_id];
-        FVector next_vert = vertices[next_id];
-        //FVector vert_normal = (next_vert - previous_vert).GetSafeNormal();
-        FVector segment_normal = (next_vert - previous_vert).GetSafeNormal();
-        FVector offset_direction = FVector(-segment_normal.Y, segment_normal.X, 0.0f);
-        FVector offset_vert = (current_vert + offset * offset_direction) + FVector(0.f, 0.f, z);
-        offset_polygon.Add(offset_vert);
-    }
-
     return offset_polygon;
 }
+
 
 FVector AOpenStreetMap_Generator::CatmullRomSpline(float t, FVector P0, FVector P1, FVector P2, FVector P3) 
 {
@@ -1184,6 +1195,54 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
             }
         }
         break;
+    }
+    case EOpenStreetMap_RoofType::Gabled:
+    {
+        for (const FVector& point : footprint)
+        {
+            vertices.Add(FVector(point.X, point.Y, roof_height));
+        }
+
+        TArray<FVector> upper_roof = OffsetPolygon(footprint, 250, roof_height + roof_size);
+
+        for (const FVector& point : upper_roof)
+        {
+            vertices.Add(FVector(point.X, point.Y, roof_height + roof_size));
+        }
+
+
+        TArray<int> t_indices;
+        TriangulatePolygonInPlace(polygon, t_indices, triangles, winding);
+
+        TArray<FVector2D> polygon2;
+        TArray<int> t_indices2;
+        TArray<int> triangles2;
+        for (FVector v : upper_roof)
+        {
+            polygon2.Add(FVector2D(v));
+        }
+
+        winding = Area(polygon2) < 0.0f;
+        TriangulatePolygonInPlace(polygon2, t_indices2, triangles2, winding); 
+
+        t_indices.Append(t_indices2);
+        triangles.Append(triangles2);
+
+        ReverseArray(vertices);
+
+        for (int i = 0; i < footprint.Num(); ++i)
+        {
+            int v0 = i % footprint.Num();
+            int v1 = (i + 1) % footprint.Num();
+            int v2 = footprint.Num() + i % (footprint.Num() * 2);
+            int v3 = footprint.Num() + (i + 1) % (footprint.Num() * 2);
+            t_indices.Add(v0);
+            t_indices.Add(v1);
+            t_indices.Add(v2);
+            t_indices.Add(v3);
+            t_indices.Add(v2);
+            t_indices.Add(v1);
+        }
     }
     /*
     case EOpenStreetMap_RoofType::Sawtooth:
