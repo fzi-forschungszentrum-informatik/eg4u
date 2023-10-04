@@ -1,0 +1,204 @@
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Development\EG4U\Definitions.EG4U.h
+C:/Users/schulz/Documents/Unreal Projects/FZIsim/Plugins/EG4U/Source/EG4U/OpenDRIVE_Generator.cpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\EG4U\OpenDRIVE_Generator.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\Components/SplineComponent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\SplineComponent.generated.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty/libOpenDRIVE/include/Math.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\algorithm
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xmemory
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\limits
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cfloat
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cwchar
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cstdio
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\isa_availability.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xutility
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\__msvc_iter_core.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\utility
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\array
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cmath
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\numeric
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\vector
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\__msvc_sanitizer_annotate_container.hpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty/libOpenDRIVE/include/OpenDriveMap.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Junction.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Utils.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\functional
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\tuple
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\map
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xtree
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\memory
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\iosfwd
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\set
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\string
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xstring
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cctype
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\stdexcept
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\XmlNode.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Thirdparty/pugixml/pugixml.hpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Thirdparty\pugixml\pugiconfig.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\iterator
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Road.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Geometries/CubicSpline.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\LaneSection.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Lane.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\RoadMark.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Mesh.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\RefLine.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Geometries/RoadGeometry.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\RoadObject.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\RoutingGraph.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\unordered_map
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xhash
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\list
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xbit_ops.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\unordered_set
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty\libOpenDRIVE\include\Thirdparty/pugixml/pugixml.hpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Inc\EG4U\OpenDRIVE_Generator.generated.h
+C:/Users/schulz/Documents/Unreal Projects/FZIsim/Plugins/EG4U/Source/EG4U/OpenStreetMap_Generator.cpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\EG4U\OpenStreetMap_Generator.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AssetRegistry\Public\AssetRegistryModule.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AssetRegistry\Public\AssetRegistry/AssetRegistryModule.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AssetRegistry\Public\AssetRegistry/IAssetRegistry.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\Misc/AssetRegistryInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\AssetRegistry/ARFilter.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AssetRegistry\IAssetRegistry.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\RawMesh\Public\RawMesh.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Plugins\Runtime\ProceduralMeshComponent\Source\ProceduralMeshComponent\Public\ProceduralMeshComponent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Plugins\Runtime\ProceduralMeshComponent\Intermediate\Build\Win64\UE4Editor\Inc\ProceduralMeshComponent\ProceduralMeshComponent.generated.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\ThirdParty/libOpenDRIVE/include/ThirdParty/pugixml/pugixml.hpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Inc\EG4U\OpenStreetMap_Generator.generated.h
+C:/Users/schulz/Documents/Unreal Projects/FZIsim/Plugins/EG4U/Source/EG4U/Private/AI_PIDController.cpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\EG4U\Public\AI_PIDController.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\AIController.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\NavigationSystem\Public\NavFilters/NavigationQueryFilter.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\NavigationSystem\Public\NavAreas/NavArea.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\AI/Navigation/NavAreaBase.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\NavAreaBase.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\NavigationSystem\NavArea.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\NavigationSystem\NavigationQueryFilter.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\AITypes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\NavigationSystem\Public\NavigationSystemTypes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\AI/NavigationSystemConfig.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\NavigationSystemConfig.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\AITypes.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\GameplayTasks\Classes\GameplayTaskOwnerInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\GameplayTasks\Public\GameplayTaskTypes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\GameplayTasks\GameplayTaskOwnerInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\GameplayTasks\Classes\GameplayTask.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/WeakInterfacePtr.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\GameplayTasks\GameplayTask.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\Navigation/PathFollowingComponent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\NavigationSystem\Public\NavigationData.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\AI/Navigation/NavigationDataInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\NavigationDataInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\NavigationSystem\NavigationData.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\AIResourceInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\AIResourceInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\GameFramework/NavMovementComponent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\AI/Navigation/PathFollowingAgentInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\PathFollowingAgentInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\GameFramework/MovementComponent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\MovementComponent.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\NavMovementComponent.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\PathFollowingComponent.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\Perception/AIPerceptionListenerInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\AIPerceptionListenerInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\AIModule\Classes\GenericTeamAgentInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\GenericTeamAgentInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Public\VisualLogger/VisualLoggerDebugSnapshotInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\VisualLoggerDebugSnapshotInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AIModule\AIController.generated.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Inc\EG4U\AI_PIDController.generated.h
+C:/Users/schulz/Documents/Unreal Projects/FZIsim/Plugins/EG4U/Source/EG4U/Private/EG4U.cpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\EG4U\Public\EG4U.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Inc\EG4U\EG4U.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Core.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/MonolithicHeaderBoilerplate.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\GenericPlatform/GenericPlatformNamedPipe.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/PlatformNamedPipe.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Windows/WindowsPlatformNamedPipe.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\GenericPlatform/GenericPlatformCriticalSection.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/PlatformFile.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Windows/WindowsPlatformFile.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/PlatformIncludes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/MonolithicHeaderBoilerplate.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/MessageDialog.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\ProfilingDebugging/ScopedDebugInfo.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\ProfilingDebugging/ExternalProfiler.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/StringUtility.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/NameAsStringProxyArchive.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/MRUArray.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/TransArray.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/ArrayBuilder.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/SingleThreadEvent.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/ThreadManager.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/StaticBitArray.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/MapBuilder.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/ThreadingBase.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Internationalization/TextLocalizationManagerGlobals.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Internationalization/Culture.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Logging/LogSuppressionInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\HAL/OutputDevices.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Logging/LogScopedVerbosityOverride.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceNull.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceMemory.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceFile.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceDebug.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceArchiveWrapper.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceAnsiError.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/TimeGuard.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/LargeMemoryWriter.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/LargeMemoryData.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/LargeMemoryReader.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/BufferArchive.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/ArrayReader.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/ArrayWriter.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Serialization/BufferWriter.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/WildcardString.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Containers/CircularQueue.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceHelper.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/ScopedSlowTask.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/CallbackDevice.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/LocalTimestampDirectoryVisitor.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/BlueprintsObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/BuildObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/CoreObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/EditorObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/FrameworkObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/MobileObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/NetworkingObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/OnlineObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/PhysicsObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/PlatformObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/SequencerObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\UObject/VRObjectVersion.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/OutputDeviceConsole.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Misc/MonitoredProcess.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\Interfaces/IPluginManager.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\PluginDescriptor.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\ModuleDescriptor.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\CustomBuildSteps.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\LocalizationDescriptor.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Projects\Public\PluginReferenceDescriptor.h
+C:/Users/schulz/Documents/Unreal Projects/FZIsim/Plugins/EG4U/Source/EG4U/Private/QuickStripPacking.cpp
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Source\EG4U\Public\QuickStripPacking.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\iostream
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\istream
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\ostream
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\ios
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xlocnum
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\streambuf
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xiosbase
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\ucrt\share.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\system_error
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\__msvc_system_error_abi.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\cerrno
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xcall_once.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xerrc.h
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xlocale
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xfacet
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\xlocinfo
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\__msvc_xlocinfo_types.hpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\INCLUDE\clocale
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\ucrt\locale.h
+C:\Users\schulz\Documents\Unreal Projects\FZIsim\Plugins\EG4U\Intermediate\Build\Win64\UE4Editor\Inc\EG4U\QuickStripPacking.generated.h
