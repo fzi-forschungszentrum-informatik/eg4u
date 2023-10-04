@@ -8,4 +8,4 @@ For additional content see https://github.com/fzi-forschungszentrum-informatik/e
 
 ## Usage
 
-
+Copy the asset catalogue from eg4u-content including the Demo scene. Look for the Environment-Generator object in the world outliner and familiarize yourself with the different object types. 
