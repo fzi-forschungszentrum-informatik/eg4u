@@ -18,8 +18,29 @@
 
 #include "OpenStreetMap_Generator.generated.h"
 
+
 UENUM(BlueprintType)
-enum EOpenStreetMap_RoofType
+enum class EOpenStreetMap_RoadType : uint8
+{
+	Primary,
+	Secondary,
+	Tertiary,
+	Residential,
+	Rural,
+	Service,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_BuildingType : uint8
+{
+	Living,
+	Commercial,
+	Retail,
+	Logistic,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_RoofType : uint8
 {
 	Flat,
 	Gabled,
@@ -102,6 +123,36 @@ struct EG4U_API FOpenStreetMap_Generator_Relation
 	TMap<FString, FString> tags;
 };
 
+USTRUCT(BlueprintType)
+struct EG4U_API FOpenStreetMap_Generator_Building
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FVector> footprint;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    int floors;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float height;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_RoofType roof_type;
+};
+
+USTRUCT(BlueprintType)
+struct EG4U_API FOpenStreetMap_Generator_Road
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FVector> reference_lince;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    int lanes;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float width;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_RoadType road_type;
+};
+
 
 UCLASS()
 class EG4U_API AOpenStreetMap_Generator : public AActor
@@ -147,6 +198,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TArray<FOpenStreetMap_Generator_Way> connected_ways;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FOpenStreetMap_Generator_Building> buildings;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FOpenStreetMap_Generator_Road> roads;
 
 //	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 //	TArray<UProceduralMeshComponent> mesh_components;
@@ -214,7 +271,7 @@ public:
 	TArray<FVector2D> GenerateRoadUVs(FVector road_start, FVector road_end, FVector width, TArray<FVector> vertices);
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
-	TArray<FOpenStreetMap_Generator_MeshInfo> FindEnclosedAreaPolygons(FOpenStreetMap_Generator_Way startRoad, TArray<FOpenStreetMap_Generator_Way> roads);
+	TArray<FOpenStreetMap_Generator_MeshInfo> FindEnclosedAreaPolygons(FOpenStreetMap_Generator_Way startRoad, TArray<FOpenStreetMap_Generator_Way> streets);
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	FOpenStreetMap_Generator_MeshInfo GenerateSidewalks(TArray<FVector> ref_line);

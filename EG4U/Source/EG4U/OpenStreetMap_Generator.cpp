@@ -346,6 +346,82 @@ void AOpenStreetMap_Generator::ImportOpenStreetMap(float sample_rate, bool modif
             w.tags.Add(key.c_str(), val.c_str());
         }
         ways.Add(w); j++;
+        if (w.tags.Contains("building") || w.tags.Contains("building:part"))
+        {
+            FOpenStreetMap_Generator_Building b;
+            if (w.tags.Contains("height"))
+            {
+                FString tag = *w.tags.Find("height");
+                b.height = atof(TCHAR_TO_UTF8(*tag));
+                b.height *= 100;
+            }
+            if (w.tags.Contains("building:levels"))
+            {
+                FString tag = *w.tags.Find("building:levels");
+                b.floors = atof(TCHAR_TO_UTF8(*tag));
+                b.height = b.floors * 300.0f;
+            }
+            if (w.tags.Contains("roof:shape"))
+            {
+                FString tag = *w.tags.Find("roof:shape");
+                if (tag == "flat")
+                {
+                    b.roof_type = EOpenStreetMap_RoofType::Flat;
+                }
+                else if (tag == "gabled")
+                {
+                    b.roof_type = EOpenStreetMap_RoofType::Gabled;
+                }
+                else if (tag == "hipped")
+                {
+                    b.roof_type = EOpenStreetMap_RoofType::Hipped;
+                }
+                else if (tag == "pyramidal")
+                {
+                    b.roof_type = EOpenStreetMap_RoofType::Pyramidal;
+                }
+                else if (tag == "sawtooth")
+                {
+                    b.roof_type = EOpenStreetMap_RoofType::Sawtooth;
+                }
+            }
+            b.footprint = w.ref_line;
+            buildings.Add(b);
+        }
+        if (w.tags.Contains("highway"))
+        {
+            FOpenStreetMap_Generator_Road r;
+            FString tag = *w.tags.Find("highway");
+            {
+                if (tag == "primary")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Primary;
+                }
+                else if (tag == "secondary")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Secondary;
+                }
+                else if (tag == "tertiary")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Tertiary;
+                }
+                else if (tag == "residential")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Residential;
+                }
+                else if (tag == "rural")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Rural;
+                }
+                else if (tag == "service")
+                {
+                    r.road_type = EOpenStreetMap_RoadType::Service;
+                }
+
+                r.reference_lince = w.ref_line;
+                roads.Add(r);
+            }
+        }
     }
     for (pugi::xml_node osm_relation : osm_root.children("relation"))
     {
@@ -872,7 +948,7 @@ TArray<FVector2D> AOpenStreetMap_Generator::GenerateRoadUVs(FVector road_start, 
     return uv_coords;
 }
 
-TArray<FOpenStreetMap_Generator_MeshInfo> AOpenStreetMap_Generator::FindEnclosedAreaPolygons(FOpenStreetMap_Generator_Way startRoad, TArray<FOpenStreetMap_Generator_Way> roads) {
+TArray<FOpenStreetMap_Generator_MeshInfo> AOpenStreetMap_Generator::FindEnclosedAreaPolygons(FOpenStreetMap_Generator_Way startRoad, TArray<FOpenStreetMap_Generator_Way> streets) {
     
     TArray<FOpenStreetMap_Generator_Way> polygons;
     TArray<FOpenStreetMap_Generator_MeshInfo> polygon_meshes;
@@ -890,7 +966,7 @@ TArray<FOpenStreetMap_Generator_MeshInfo> AOpenStreetMap_Generator::FindEnclosed
     };
     TSet<int> visitedRoads;
 
-    for (FOpenStreetMap_Generator_Way road : roads) {
+    for (FOpenStreetMap_Generator_Way road : streets) {
         FOpenStreetMap_Generator_MeshInfo poly_mesh;
         if (visitedRoads.Contains(road.id)) {
             continue;
@@ -904,10 +980,10 @@ TArray<FOpenStreetMap_Generator_MeshInfo> AOpenStreetMap_Generator::FindEnclosed
         while (queue.Num() > 0) {
             int currentRoadId = queue.Pop();
 
-            for (const FOpenStreetMap_Generator_Way& connectedRoad : roads) {
+            for (const FOpenStreetMap_Generator_Way& connectedRoad : streets) {
                 if (!visitedRoads.Contains(connectedRoad.id) &&
-                    SharesCommonPoint(roads[currentRoadId], connectedRoad)) {
-                    UE_LOG(LogTemp, Log, TEXT("Roads intersecting: %d x %d"), roads[currentRoadId].id, connectedRoad.id);
+                    SharesCommonPoint(streets[currentRoadId], connectedRoad)) {
+                    UE_LOG(LogTemp, Log, TEXT("Roads intersecting: %d x %d"), streets[currentRoadId].id, connectedRoad.id);
                     queue.Add(connectedRoad.id);
                     visitedRoads.Add(connectedRoad.id);
                     for (int nd_id : connectedRoad.nd_ref)
@@ -994,31 +1070,6 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
         }
     };
 
-    if (osm_tags.Contains("roof:shape"))
-    {
-        FString tag = *osm_tags.Find("roof:shape");
-        if (tag == "flat")
-        {
-            roof_type = EOpenStreetMap_RoofType::Flat;
-        }
-        else if (tag == "gabled")
-        {
-            roof_type = EOpenStreetMap_RoofType::Gabled;
-        }
-        else if (tag == "hipped")
-        {
-            roof_type = EOpenStreetMap_RoofType::Hipped;
-        }
-        else if (tag == "pyramidal")
-        {
-            roof_type = EOpenStreetMap_RoofType::Pyramidal;
-        }
-        else if (tag == "sawtooth")
-        {
-            roof_type = EOpenStreetMap_RoofType::Sawtooth;
-        }
-    }
-
     TArray<FVector> vertices;
     TArray<int> triangles;
     TArray<FVector2D> uv_coords;
@@ -1098,71 +1149,55 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
 
         triangles.Append(t_indices);
     }
+    */
     case EOpenStreetMap_RoofType::Gabled:
     {
-        int base_indices = footprint.Num();
-
-        int first01 = 0;
-        int first02 = 0;
-        int second01 = 0;
-        int second02 = 0;
-
-        for (int i = 0; i < base_indices; ++i)
+        for (const FVector& point : footprint)
         {
-            int v0 = i % base_indices;
-            int v1 = (i + 1) % base_indices;
-            if (FVector::Distance(footprint[v0], footprint[v1]) > FVector::Distance(footprint[first01], footprint[first02]))
-            {
-                second01 = first01;
-                second02 = first02;
-                first01 = v0;
-                first02 = v1;
-            }
-            else if (FVector::Distance(footprint[v0], footprint[v1]) > FVector::Distance(footprint[second01], footprint[second02]))
-            {
-                second01 = v0;
-                second02 = v1;
-            }
+            vertices.Add(FVector(point.X, point.Y, roof_height));
         }
-        FVector edge_vert01 = FVector(
-            (footprint[first01].X + footprint[first02].X) / 2,
-            (footprint[first01].Y + footprint[first02].Y) / 2,
-             roof_height+roof_size);
-        FVector edge_vert02 = FVector(
-            (footprint[second01].X + footprint[second02].X) / 2,
-            (footprint[second01].Y + footprint[second02].Y) / 2,
-            roof_height + roof_size);
+
+        TArray<FVector> upper_roof = OffsetPolygon(footprint, 250, roof_height + roof_size);
+
+        for (const FVector& point : upper_roof)
+        {
+            vertices.Add(FVector(point.X, point.Y, roof_height + roof_size));
+        }
+
 
         TArray<int> t_indices;
+        TriangulatePolygonInPlace(polygon, t_indices, triangles, winding);
 
-        TArray<FVector2D> roof_verts;
-        for (FVector v : footprint)
+        TArray<FVector2D> polygon2;
+        TArray<int> t_indices2;
+        TArray<int> triangles2;
+        for (FVector v : upper_roof)
         {
-            roof_verts.Add(FVector2D(v));
+            polygon2.Add(FVector2D(v));
         }
-        roof_verts.Add(FVector2D(edge_vert01));
-        roof_verts.Add(FVector2D(edge_vert02));
 
-        TriangulatePolygonInPlace(roof_verts, t_indices, triangles, winding);
+        winding = Area(polygon2) < 0.0f;
+        TriangulatePolygonInPlace(polygon2, t_indices2, triangles2, winding);
 
-        for (FVector2D v : roof_verts)
+        t_indices.Append(t_indices2);
+        triangles.Append(triangles2);
+
+        ReverseArray(vertices);
+
+        for (int i = 0; i < footprint.Num(); ++i)
         {
-            vertices.Add(FVector(v.X, v.Y, roof_height));
+            int v0 = i % footprint.Num();
+            int v1 = (i + 1) % footprint.Num();
+            int v2 = footprint.Num() + i % (footprint.Num() * 2);
+            int v3 = footprint.Num() + (i + 1) % (footprint.Num() * 2);
+            t_indices.Add(v0);
+            t_indices.Add(v1);
+            t_indices.Add(v2);
+            t_indices.Add(v3);
+            t_indices.Add(v2);
+            t_indices.Add(v1);
         }
-        vertices[base_indices] = FVector(vertices[base_indices].X, vertices[base_indices].Y, roof_height + roof_size);
-        vertices[base_indices + 1] = FVector(vertices[base_indices + 1].X, vertices[base_indices + 1].Y, roof_height + roof_size);
-        
-        triangles.Append(t_indices);
-
-        triangles.Add(first01);
-        triangles.Add(base_indices + 1);
-        triangles.Add(first02);
-        triangles.Add(second01);
-        triangles.Add(base_indices);
-        triangles.Add(second02);
-        break;
     }
-    */
     case EOpenStreetMap_RoofType::Pyramidal:
     {
         for (const FVector& point : footprint)
@@ -1195,54 +1230,6 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
             }
         }
         break;
-    }
-    case EOpenStreetMap_RoofType::Gabled:
-    {
-        for (const FVector& point : footprint)
-        {
-            vertices.Add(FVector(point.X, point.Y, roof_height));
-        }
-
-        TArray<FVector> upper_roof = OffsetPolygon(footprint, 250, roof_height + roof_size);
-
-        for (const FVector& point : upper_roof)
-        {
-            vertices.Add(FVector(point.X, point.Y, roof_height + roof_size));
-        }
-
-
-        TArray<int> t_indices;
-        TriangulatePolygonInPlace(polygon, t_indices, triangles, winding);
-
-        TArray<FVector2D> polygon2;
-        TArray<int> t_indices2;
-        TArray<int> triangles2;
-        for (FVector v : upper_roof)
-        {
-            polygon2.Add(FVector2D(v));
-        }
-
-        winding = Area(polygon2) < 0.0f;
-        TriangulatePolygonInPlace(polygon2, t_indices2, triangles2, winding); 
-
-        t_indices.Append(t_indices2);
-        triangles.Append(triangles2);
-
-        ReverseArray(vertices);
-
-        for (int i = 0; i < footprint.Num(); ++i)
-        {
-            int v0 = i % footprint.Num();
-            int v1 = (i + 1) % footprint.Num();
-            int v2 = footprint.Num() + i % (footprint.Num() * 2);
-            int v3 = footprint.Num() + (i + 1) % (footprint.Num() * 2);
-            t_indices.Add(v0);
-            t_indices.Add(v1);
-            t_indices.Add(v2);
-            t_indices.Add(v3);
-            t_indices.Add(v2);
-            t_indices.Add(v1);
-        }
     }
     /*
     case EOpenStreetMap_RoofType::Sawtooth:
