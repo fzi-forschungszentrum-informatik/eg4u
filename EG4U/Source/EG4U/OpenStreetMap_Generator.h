@@ -14,6 +14,7 @@
 #include "Components/SplineComponent.h"
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 
+#include "UPlanarGraph.h" 
 #include "ThirdParty/libOpenDRIVE/include/ThirdParty/pugixml/pugixml.hpp"
 
 #include "OpenStreetMap_Generator.generated.h"
@@ -28,13 +29,50 @@ enum class EOpenStreetMap_RoadType : uint8
 	Residential,
 	Rural,
 	Service,
+	UnknownRoad,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_CyclewayType : uint8
+{
+	SeparateCycleway,
+	Lane,
+	Exclusive,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_SidewalkType : uint8
+{
+	None,
+	Yes,
+	Designated,
+	SeparateSidewalk,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_ParkingOrientation : uint8
+{
+	Parallel,
+	Perpendicular,
+	Diagonal,
+};
+
+UENUM(BlueprintType)
+enum class EOpenStreetMap_ParkingType : uint8
+{
+	Lane,
+	StreetSide,
+	OnKerb,
+	HalfOnKerb,
+	SeparateParking,
+	NoStopping,
 };
 
 UENUM(BlueprintType)
 enum class EOpenStreetMap_BuildingType : uint8
 {
 	Living,
-	Commercial,
+	Commercial, // office
 	Retail,
 	Logistic,
 };
@@ -136,6 +174,8 @@ struct EG4U_API FOpenStreetMap_Generator_Building
 	float height;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EOpenStreetMap_RoofType roof_type;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<int> nodes;
 };
 
 USTRUCT(BlueprintType)
@@ -148,11 +188,52 @@ struct EG4U_API FOpenStreetMap_Generator_Road
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int lanes;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int lanes_backward;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float width;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EOpenStreetMap_RoadType road_type;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString street_name;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool oneway;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_CyclewayType cycleway_type;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_SidewalkType sidewalk_type_left;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_SidewalkType sidewalk_type_right;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_ParkingType parking_type_left;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_ParkingType parking_type_right;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_ParkingOrientation parking_orientation_left;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	EOpenStreetMap_ParkingOrientation parking_orientation_right;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<int> nodes;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int id;
 };
 
+USTRUCT(BlueprintType)
+struct EG4U_API FOpenStreetMap_Generator_MergedRoad
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FOpenStreetMap_Generator_Road> road_parts;
+};
+
+USTRUCT(BlueprintType)
+struct EG4U_API FOpenStreetMap_Generator_NodeGraphIDs
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<int> nodes;
+};
 
 UCLASS()
 class EG4U_API AOpenStreetMap_Generator : public AActor
@@ -160,7 +241,6 @@ class EG4U_API AOpenStreetMap_Generator : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AOpenStreetMap_Generator();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -205,23 +285,33 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TArray<FOpenStreetMap_Generator_Road> roads;
 
-//	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-//	TArray<UProceduralMeshComponent> mesh_components;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FString> street_names;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TMap<FString, FOpenStreetMap_Generator_MergedRoad> roads_merged;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TMap<int, FOpenStreetMap_Generator_NodeGraphIDs> road_graph;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TMap<int, FOpenStreetMap_Generator_NodeGraphIDs> building_graph;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TArray<FOpenStreetMap_Generator_Road> road_cycles;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// File handler
 	pugi::xml_document xml_doc;
 
 	TMap<FString, int> node_map;
 	TMap<FString, int> way_map;
 	TMap<FString, int> rel_map;
 
+
 public:	
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
@@ -236,9 +326,15 @@ public:
 		
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	TArray<FVector> ScalePolygon(TArray<FVector>& polygon, float scale, FVector pivot, float z);
+	
+	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
+	TArray<FVector> BufferPolygon(TArray<FVector> OriginalPolygon, float BufferDistance, float z);
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	TArray<FVector> OffsetPolygon(TArray<FVector> poly, float offset, float z);
+	
+	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
+	TArray<FVector> ConvexHull(TArray<FVector> Points);
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	FVector CatmullRomSpline(float t, FVector P0, FVector P1, FVector P2, FVector P3);
@@ -251,6 +347,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	void ImportOpenStreetMap(float sample_rate, bool modify_eps, FVector center, float scale, bool flat, FString filename);
+
+	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
+	void CollectRoadParts();
+	
+	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
+	void CollectRoadCycles();
 
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	TArray<int> FindSharedNodes();
@@ -284,7 +386,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	FOpenStreetMap_Generator_MeshInfo GenerateBuilding(TArray<FVector> footprint, TMap<FString, FString> osm_tags, int default_levels, EOpenStreetMap_RoofType roof_type, float roof_size);
-	
+
+	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
+	TArray<int> TriangulatePolygon(TArray<FVector> InPolygon);
+
 	UFUNCTION(BlueprintCallable, Category = libOpenStreetMap)
 	static bool TriangulatePolygonInPlace(TArray<FVector2D>& Polygon, TArray<int32>& TempIndices, TArray<int32>& TriangulatedIndices, bool& OutWindsClockwise)
 	{

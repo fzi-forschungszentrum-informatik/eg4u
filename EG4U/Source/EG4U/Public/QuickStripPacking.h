@@ -46,11 +46,9 @@ public:
 	std::vector<FQuickStripPacking_Item> m_items;
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	float QuickStripPack(std::vector<FQuickStripPacking_Item> items, float strip_width);

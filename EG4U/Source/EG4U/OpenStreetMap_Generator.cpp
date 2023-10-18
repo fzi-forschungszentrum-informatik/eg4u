@@ -34,6 +34,13 @@ void AOpenStreetMap_Generator::ClearOpenStreetMap()
     nodes.Empty();
     ways.Empty();
     relations.Empty();
+    connected_ways.Empty();
+    buildings.Empty();
+    roads.Empty();
+    street_names.Empty();
+    roads_merged.Empty();
+    road_graph.Empty();
+    building_graph.Empty();
 }
 
 FVector AOpenStreetMap_Generator::LatLonToXY(double lat, double lon)
@@ -86,15 +93,121 @@ TArray<FVector> AOpenStreetMap_Generator::ScalePolygon(TArray<FVector>& polygon,
     return polygon;
 }
 
+TArray<int> AOpenStreetMap_Generator::TriangulatePolygon(TArray<FVector> InPolygon)
+{
+    TArray<FVector2D> Polygon;
+    for (FVector v : InPolygon)
+    {
+        Polygon.Add(FVector2D(v));
+    }
+
+    TArray<int> TempIndices;
+    TArray<int> TriangulatedIndices;
+
+    checkSlow(&TempIndices != &TriangulatedIndices);
+    TriangulatedIndices.Reset();
+    bool OutWindsClockwise = false;
+
+    int NumVertices = Polygon.Num();
+    if (NumVertices < 3)
+    {
+        return TriangulatedIndices;
+    }
+    TempIndices.SetNumUninitialized(NumVertices);
+    int* VertexIndices = TempIndices.GetData();
+
+    OutWindsClockwise = Area(Polygon) < 0.0f;
+    if (!OutWindsClockwise)
+    {
+        for (int PointIndex = 0; PointIndex < NumVertices; PointIndex++)
+        {
+            VertexIndices[PointIndex] = PointIndex;
+        }
+    }
+    else
+    {
+        for (int PointIndex = 0; PointIndex < NumVertices; PointIndex++)
+        {
+            VertexIndices[PointIndex] = (NumVertices - 1) - PointIndex;
+        }
+    }
+
+    int ErrorDetectionCounter = 2 * NumVertices;
+    for (int V = NumVertices - 1; NumVertices > 2; )
+    {
+        if (--ErrorDetectionCounter <= 0)
+        {
+            return TriangulatedIndices;
+        }
+        const int U = (V < NumVertices) ? V : 0;
+        V = ((U + 1) < NumVertices) ? U + 1 : 0;
+        const int W = ((V + 1) < NumVertices) ? V + 1 : 0;
+
+        if (Snip(Polygon, U, V, W, NumVertices, VertexIndices))
+        {
+            TriangulatedIndices.Add(VertexIndices[U]);
+            TriangulatedIndices.Add(VertexIndices[V]);
+            TriangulatedIndices.Add(VertexIndices[W]);
+
+            for (int S = V, T = V + 1; T < NumVertices; S++, T++)
+            {
+                VertexIndices[S] = VertexIndices[T];
+            }
+            NumVertices--;
+            ErrorDetectionCounter = 2 * NumVertices;
+        }
+    }
+
+    return TriangulatedIndices;
+}
+
+TArray<FVector> AOpenStreetMap_Generator::BufferPolygon(TArray<FVector> OriginalPolygon, float BufferDistance, float z) {
+    TArray<FVector> BufferPoly;
+
+    const int32 NumPoints = OriginalPolygon.Num();
+    for (int32 i = 0; i < NumPoints; ++i) {
+        int32 PrevIdx = (i + NumPoints - 1) % NumPoints;
+        int32 NextIdx = (i + 1) % NumPoints;
+        const FVector P1 = OriginalPolygon[i];
+        const FVector P0 = OriginalPolygon[PrevIdx];
+        const FVector P2 = OriginalPolygon[NextIdx];
+
+        FVector Edge1 = P0 - P1;
+        FVector Edge2 = P2 - P1;
+
+        FVector Normal1 = FVector(Edge1.Y, -Edge1.X, z);
+        FVector Normal2 = FVector(Edge2.Y, -Edge2.X, z);
+        Normal1.Normalize();
+        Normal2.Normalize();
+
+        // Calculate the angle between the normals
+        float Angle = FMath::Acos(FVector::DotProduct(Normal1, Normal2));
+
+        // Calculate the bisector length
+        float Length = BufferDistance / FMath::Cos(Angle / 2.0f);
+
+        // Calculate the normalized bisector vector
+        FVector Bisector = Normal1 + Normal2;
+        Bisector.Normalize();
+
+        // Calculate the offset point
+        FVector OffsetP1 = P1 + Length * Bisector;
+
+        BufferPoly.Add(OffsetP1);
+    }
+
+    return BufferPoly;
+}
+
 TArray<FVector> AOpenStreetMap_Generator::OffsetPolygon(TArray<FVector> vertices, float offset, float z)
 {
     TArray<FVector> offset_polygon; int OuterCCW = 1;
-    if (offset < 0)
-        OuterCCW = -1;
-    if (OutWindsClockwise(vertices))
-        OuterCCW *= -1;
-
-    for (int32 Curr = 0; Curr < vertices.Num(); ++Curr) {
+    //if (offset < 0)
+    //{
+    //    OuterCCW = -1;
+    //}
+    for (int32 Curr = 0; Curr < vertices.Num(); ++Curr) 
+    {
         int32 Prev = (Curr + vertices.Num() - 1) % vertices.Num();
         int32 Next = (Curr + 1) % vertices.Num();
 
@@ -120,6 +233,46 @@ TArray<FVector> AOpenStreetMap_Generator::OffsetPolygon(TArray<FVector> vertices
     return offset_polygon;
 }
 
+TArray<FVector> AOpenStreetMap_Generator::ConvexHull(TArray<FVector> Points) {
+    
+    int32 NumPoints = Points.Num();
+    if (NumPoints < 3) 
+    {
+        return Points;
+    }
+
+    Points.Sort([](const FVector& A, const FVector& B) 
+        {
+        return A.X < B.X || (A.X == B.X && A.Y < B.Y);
+        });
+
+    TArray<FVector> UpperHull, LowerHull;
+
+    // Build the upper hull
+    for (int32 i = 0; i < NumPoints; ++i) 
+    {
+        while (UpperHull.Num() >= 2 && FVector::CrossProduct(UpperHull[UpperHull.Num() - 2] - UpperHull.Last(), Points[i] - UpperHull.Last()).Z <= 0) 
+        {
+            UpperHull.Pop(false);
+        }
+        UpperHull.Add(Points[i]);
+    }
+
+    // Build the lower hull
+    for (int32 i = NumPoints - 1; i >= 0; --i) 
+    {
+        while (LowerHull.Num() >= 2 && FVector::CrossProduct(LowerHull[LowerHull.Num() - 2] - LowerHull.Last(), Points[i] - LowerHull.Last()).Z <= 0) 
+        {
+            LowerHull.Pop(false);
+        }
+        LowerHull.Add(Points[i]);
+    }
+
+    // Combine the upper and lower hulls to get the convex hull
+    UpperHull.Pop(false); // Remove the last point (it's also in the lower hull)
+    UpperHull.Append(LowerHull);
+    return UpperHull;
+}
 
 FVector AOpenStreetMap_Generator::CatmullRomSpline(float t, FVector P0, FVector P1, FVector P2, FVector P3) 
 {
@@ -386,40 +539,399 @@ void AOpenStreetMap_Generator::ImportOpenStreetMap(float sample_rate, bool modif
                 }
             }
             b.footprint = w.ref_line;
+            b.nodes = w.nd_ref;
             buildings.Add(b);
         }
         if (w.tags.Contains("highway"))
         {
             FOpenStreetMap_Generator_Road r;
-            FString tag = *w.tags.Find("highway");
-            {
-                if (tag == "primary")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Primary;
-                }
-                else if (tag == "secondary")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Secondary;
-                }
-                else if (tag == "tertiary")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Tertiary;
-                }
-                else if (tag == "residential")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Residential;
-                }
-                else if (tag == "rural")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Rural;
-                }
-                else if (tag == "service")
-                {
-                    r.road_type = EOpenStreetMap_RoadType::Service;
-                }
+            r.width = 0.f;
+            r.lanes = 0;
+            r.road_type = EOpenStreetMap_RoadType::UnknownRoad;
+            r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Parallel;
+            r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Parallel;
+            r.parking_type_left = EOpenStreetMap_ParkingType::NoStopping;
+            r.parking_type_right = EOpenStreetMap_ParkingType::NoStopping;
+            r.sidewalk_type_left = EOpenStreetMap_SidewalkType::None;
+            r.sidewalk_type_right = EOpenStreetMap_SidewalkType::None;
 
-                r.reference_lince = w.ref_line;
-                roads.Add(r);
+            if (w.tags.Contains("lanes"))
+            {
+                FString lanes_tag = *w.tags.Find("lanes");
+                r.lanes = atof(TCHAR_TO_UTF8(*lanes_tag));;
+            }
+            if (w.tags.Contains("width"))
+            {
+                FString width = *w.tags.Find("width");
+                r.width = atof(TCHAR_TO_UTF8(*width)) * 100.f;
+            }
+            if (w.tags.Contains("name"))
+            {
+                FString name_tag = *w.tags.Find("name");
+                r.street_name = name_tag;   
+            }
+            if (w.tags.Contains("oneway"))
+            {
+                FString oneway_tag = *w.tags.Find("oneway");
+                r.oneway = (oneway_tag == "yes");
+            }
+            if (w.tags.Contains("sidewalk"))
+            {
+                FString sidewalk_tag = *w.tags.Find("sidewalk");
+                if (sidewalk_tag == "both" || sidewalk_tag == "yes")
+                {
+                    r.sidewalk_type_left = EOpenStreetMap_SidewalkType::Yes;
+                    r.sidewalk_type_right = EOpenStreetMap_SidewalkType::Yes;
+                }
+                else if (sidewalk_tag == "left")
+                {
+                    r.sidewalk_type_left = EOpenStreetMap_SidewalkType::Yes;
+                }
+                else if (sidewalk_tag == "right")
+                {
+                    r.sidewalk_type_right = EOpenStreetMap_SidewalkType::Yes;
+                }
+            }
+            if (w.tags.Contains("sidewalk:left"))
+            {
+                r.sidewalk_type_left = EOpenStreetMap_SidewalkType::None;
+                r.sidewalk_type_right = EOpenStreetMap_SidewalkType::None;
+
+                FString sidewalk_tag = *w.tags.Find("sidewalk:left");
+                if (sidewalk_tag == "yes")
+                {
+                    r.sidewalk_type_left = EOpenStreetMap_SidewalkType::Yes;
+                }
+                else if (sidewalk_tag == "designated")
+                {
+                    r.sidewalk_type_left = EOpenStreetMap_SidewalkType::Designated;
+                }
+                else if (sidewalk_tag == "separate")
+                {
+                    r.sidewalk_type_left = EOpenStreetMap_SidewalkType::SeparateSidewalk;
+                }
+            }
+            if (w.tags.Contains("sidewalk:right"))
+            {
+                FString sidewalk_tag = *w.tags.Find("sidewalk:right");
+                if (sidewalk_tag == "yes")
+                {
+                    r.sidewalk_type_right = EOpenStreetMap_SidewalkType::Yes;
+                }
+                else if (sidewalk_tag == "designated")
+                {
+                    r.sidewalk_type_right = EOpenStreetMap_SidewalkType::Designated;
+                }
+                else if (sidewalk_tag == "separate")
+                {
+                    r.sidewalk_type_right = EOpenStreetMap_SidewalkType::SeparateSidewalk;
+                }
+            }
+            if (w.tags.Contains("parking"))
+            {
+                FString parking_tag = *w.tags.Find("parking");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::OnKerb;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::HalfOnKerb;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+            }
+            if (w.tags.Contains("parking:left"))
+            {
+                FString parking_tag = *w.tags.Find("parking:left");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+            }
+            if (w.tags.Contains("parking:right"))
+            {
+                FString parking_tag = *w.tags.Find("parking:right");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+            }
+            if (w.tags.Contains("parking:lane:left"))
+            {
+                FString parking_tag = *w.tags.Find("parking:lane:left");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "parallel")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+            if (w.tags.Contains("parking:lane:right"))
+            {
+                FString parking_tag = *w.tags.Find("parking:lane:right");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "parallel")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+            if (w.tags.Contains("parking:both"))
+            {
+                FString parking_tag = *w.tags.Find("parking:both");
+                if (parking_tag == "yes")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::Lane;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::Lane;
+                }
+                else if (parking_tag == "street_side")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::StreetSide;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::OnKerb;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::OnKerb;
+                }
+                else if (parking_tag == "half_on_kerb")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::HalfOnKerb;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::HalfOnKerb;
+                }
+                else if (parking_tag == "separate")
+                {
+                    r.parking_type_left = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_type_right = EOpenStreetMap_ParkingType::SeparateParking;
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+            }
+
+            if (w.tags.Contains("parking:left:orientation"))
+            {
+                FString parking_tag = *w.tags.Find("parking:left:orientation");
+                if (parking_tag == "parallel")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+            if (w.tags.Contains("parking:right:orientation"))
+            {
+                FString parking_tag = *w.tags.Find("parking:right:orientation");
+                if (parking_tag == "parallel")
+                {
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+            if (w.tags.Contains("parking:both:orientation"))
+            {
+                FString parking_tag = *w.tags.Find("parking:both:orientation");
+                if (parking_tag == "parallel")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Parallel;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Diagonal;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+            if (w.tags.Contains("parking:orientation"))
+            {
+                FString parking_tag = *w.tags.Find("parking:orientation");
+                if (parking_tag == "parallel")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Parallel;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Parallel;
+                }
+                else if (parking_tag == "perpendicular")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Perpendicular;
+                }
+                else if (parking_tag == "diagonal")
+                {
+                    r.parking_orientation_left = EOpenStreetMap_ParkingOrientation::Diagonal;
+                    r.parking_orientation_right = EOpenStreetMap_ParkingOrientation::Diagonal;
+                }
+            }
+
+            FString tag = *w.tags.Find("highway");
+            if (tag == "primary")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Primary;
+            }
+            else if (tag == "secondary")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Secondary;
+            }
+            else if (tag == "tertiary")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Tertiary;
+            }
+            else if (tag == "residential")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Residential;
+            }
+            else if (tag == "rural")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Rural;
+            }
+            else if (tag == "service")
+            {
+                r.road_type = EOpenStreetMap_RoadType::Service;
+            }
+            r.reference_lince = w.ref_line;
+            r.nodes = w.nd_ref;
+            r.id = w.id;
+            roads.Add(r);
+
+            if (street_names.Find(r.street_name) == INDEX_NONE)
+            {
+                street_names.Add(r.street_name);
             }
         }
     }
@@ -449,6 +961,64 @@ void AOpenStreetMap_Generator::ImportOpenStreetMap(float sample_rate, bool modif
         }
         relations.Add(rel); k++;
     }
+}
+
+void AOpenStreetMap_Generator::CollectRoadParts()
+{
+    for (FOpenStreetMap_Generator_Road road : roads)
+    {
+        if (!roads_merged.Contains(road.street_name))
+        {
+            roads_merged.Find(road.street_name)->road_parts.Add(road);
+        }
+        else
+        {
+            FOpenStreetMap_Generator_MergedRoad new_merged_road;
+            new_merged_road.road_parts.Add(road);
+            roads_merged.Add(road.street_name, new_merged_road);
+        }
+    }
+}
+
+void AOpenStreetMap_Generator::CollectRoadCycles()
+{
+    UPlanarGraph* road_graph2D = NewObject<UPlanarGraph>(this);
+
+    for (int i = 0; i < nodes.Num(); i++)
+    {
+        road_graph2D->AddNode(nodes[i].coord, nodes[i].id);
+    }
+
+    int k = 0;
+    for (int i = 0; i < roads.Num(); i++)
+    {
+        for (int j = 0; j < roads[i].nodes.Num() - 1; j++)
+        {
+            TArray<FVector> edge_points;
+            edge_points.Add(roads[i].reference_lince[j]);
+            edge_points.Add(roads[i].reference_lince[j+1]);
+            road_graph2D->AddEdge(roads[i].nodes[j], roads[i].nodes[j + 1], k, roads[i].reference_lince);
+            k++;
+        }
+    }
+
+    TArray<TArray<int>> cycles = road_graph2D->FindCycles();
+    for (auto c : cycles)
+    {
+        FOpenStreetMap_Generator_Road current_cycle;
+        for (auto nd : c)
+        {
+            current_cycle.nodes.Add(nodes[nd].id);
+            current_cycle.reference_lince.Add(nodes[nd].coord);
+
+            // append edges InterNodes
+            // 
+            // remove duplicates
+        }
+
+        road_cycles.Add(current_cycle);
+    }
+    road_graph2D->DestroyComponent();
 }
 
 TArray<int> AOpenStreetMap_Generator::FindSharedNodes() 
@@ -1097,18 +1667,16 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
         roof_size = roof_levels * 600.f;
     }
 
-    TArray<FVector2D> polygon;
-    for (FVector v : footprint)
-    {
-        polygon.Add(FVector2D(v));
-    }
-    bool winding = Area(polygon) < 0.0f;
-
     switch (roof_type)
     {
     /*
     case EOpenStreetMap_RoofType::Hipped:
     {
+        TArray<FVector2D> polygon;
+        for (FVector v : footprint)
+        {
+            polygon.Add(FVector2D(v));
+        }
         for (const FVector& point : footprint) 
         {
             vertices.Add(FVector(point.X, point.Y, roof_height));
@@ -1152,54 +1720,59 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
     */
     case EOpenStreetMap_RoofType::Gabled:
     {
-        for (const FVector& point : footprint)
-        {
-            vertices.Add(FVector(point.X, point.Y, roof_height));
-        }
-
-        TArray<FVector> upper_roof = OffsetPolygon(footprint, 250, roof_height + roof_size);
-
-        for (const FVector& point : upper_roof)
-        {
-            vertices.Add(FVector(point.X, point.Y, roof_height + roof_size));
-        }
-
-
         TArray<int> t_indices;
-        TriangulatePolygonInPlace(polygon, t_indices, triangles, winding);
-
-        TArray<FVector2D> polygon2;
-        TArray<int> t_indices2;
         TArray<int> triangles2;
-        for (FVector v : upper_roof)
+        TArray<FVector2D> polygon;
+        for (FVector v : footprint)
         {
-            polygon2.Add(FVector2D(v));
+            polygon.Add(FVector2D(v));
         }
+        bool winding = Area(polygon) < 0.0f;
+        TriangulatePolygonInPlace(polygon, t_indices, triangles2, winding);
+        float top_offset = winding ? 500000 : -500000;
+        TArray<FVector> upper_roof = OffsetPolygon(footprint, top_offset, roof_height + roof_size);
+        
+        for (int i = 0; i < footprint.Num(); ++i) 
+        {
+            vertices.Add(FVector(footprint[i].X, footprint[i].Y, roof_height)); // corner 1
+            vertices.Add(FVector(footprint[(i + 1) % footprint.Num()].X, footprint[(i + 1) % footprint.Num()].Y, roof_height)); // corner 2
+            vertices.Add(FVector(upper_roof[i].X, upper_roof[i].Y, roof_height + roof_size)); // top 1
+            vertices.Add(FVector(upper_roof[(i + 1) % upper_roof.Num()].X, upper_roof[(i + 1) % upper_roof.Num()].Y, roof_height + roof_size)); // top 2
 
-        winding = Area(polygon2) < 0.0f;
-        TriangulatePolygonInPlace(polygon2, t_indices2, triangles2, winding);
-
-        t_indices.Append(t_indices2);
+            int base_id = i * 4;
+            if (winding)
+            {
+                triangles.Add(base_id + 1);
+                triangles.Add(base_id);
+                triangles.Add(base_id + 2);
+                triangles.Add(base_id + 3);
+                triangles.Add(base_id + 1);
+                triangles.Add(base_id + 2);
+            }
+            else
+            {
+                triangles.Add(base_id);
+                triangles.Add(base_id + 1);
+                triangles.Add(base_id + 2);
+                triangles.Add(base_id + 1);
+                triangles.Add(base_id + 3);
+                triangles.Add(base_id + 2);
+            }
+        }
+        vertices.Append(upper_roof);
         triangles.Append(triangles2);
-
         ReverseArray(vertices);
-
-        for (int i = 0; i < footprint.Num(); ++i)
-        {
-            int v0 = i % footprint.Num();
-            int v1 = (i + 1) % footprint.Num();
-            int v2 = footprint.Num() + i % (footprint.Num() * 2);
-            int v3 = footprint.Num() + (i + 1) % (footprint.Num() * 2);
-            t_indices.Add(v0);
-            t_indices.Add(v1);
-            t_indices.Add(v2);
-            t_indices.Add(v3);
-            t_indices.Add(v2);
-            t_indices.Add(v1);
-        }
     }
     case EOpenStreetMap_RoofType::Pyramidal:
     {
+        TArray<int> t_indices;
+        TArray<FVector2D> polygon;
+        for (FVector v : footprint)
+        {
+            polygon.Add(FVector2D(v));
+        }
+        bool winding = Area(polygon) < 0.0f;
+
         for (const FVector& point : footprint)
         {
             centroid.X += point.X;
@@ -1259,6 +1832,12 @@ FOpenStreetMap_Generator_MeshInfo AOpenStreetMap_Generator::GenerateRoof(TArray<
     case EOpenStreetMap_RoofType::Flat:
     default:
         TArray<int> t_indices;
+        TArray<FVector2D> polygon;
+        for (FVector v : footprint)
+        {
+            polygon.Add(FVector2D(v));
+        }
+        bool winding = Area(polygon) < 0.0f;
         TriangulatePolygonInPlace(polygon, t_indices, triangles, winding);
         for (FVector2D v : polygon)
         {
